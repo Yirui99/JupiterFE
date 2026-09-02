@@ -86,10 +86,47 @@ export const searchGameById = (gameId) => {
   })
 }
  
+// 单一类型的一页数据，返回 { items, cursor }。cursor 为空表示没有下一页。
+// 不带 cursor 时后端可以走缓存，带 cursor 则实时请求 Twitch。
+const searchPageUrl = `${SERVER_ORIGIN}/search/page`;
+
+export const ITEM_TYPES = ['STREAM', 'VIDEO', 'CLIP'];
+
+export const searchItemsPage = (gameId, type, cursor, limit = 21) => {
+  const params = new URLSearchParams({ game_id: gameId, type, limit: String(limit) });
+
+  if (cursor) {
+    params.set('cursor', cursor);
+  }
+
+  return fetch(`${searchPageUrl}?${params.toString()}`).then((response) => {
+    if (response.status !== 200) {
+      throw Error('Fail to load more items');
+    }
+
+    return response.json();
+  })
+}
+
+// 三种类型并行取第一页，返回 { STREAM: {items, cursor}, VIDEO: ..., CLIP: ... }
+export const searchPagesByGameId = (gameId) => {
+  return Promise.all(
+    ITEM_TYPES.map((type) => searchItemsPage(gameId, type).then((page) => [type, page]))
+  ).then((entries) => {
+    const pages = {};
+    entries.forEach(([type, page]) => {
+      pages[type] = { items: page.items || [], cursor: page.cursor || null };
+    });
+
+    return pages;
+  })
+}
+
+// 搜索按名字找到游戏后，把 gameId 一并返回，翻页时需要它
 export const searchGameByName = (gameName) => {
   return getGameDetails(gameName).then((data) => {
     if (data && data.id) {
-      return searchGameById(data.id);
+      return searchPagesByGameId(data.id).then((pages) => ({ gameId: data.id, pages }));
     }
  
     throw Error('Fail to find the game')
@@ -142,8 +179,8 @@ export const getFavoriteItem = () => {
  
 const getRecommendedItemsUrl = `${SERVER_ORIGIN}/recommendation`;
  
-export const getRecommendations = () => {
-  return fetch(getRecommendedItemsUrl, {
+export const getRecommendations = (page = 0) => {
+  return fetch(`${getRecommendedItemsUrl}?page=${page}`, {
     credentials: 'include',
   }).then((response) => {
     if (response.status !== 200) {

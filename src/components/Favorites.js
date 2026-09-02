@@ -36,6 +36,7 @@ class Favorites extends React.Component {
           title="My Favorites"
           placement="right"
           width={720}
+          className="site-favorites-drawer"
           visible={this.state.displayDrawer}
           onClose={this.onDrawerClose}
         >

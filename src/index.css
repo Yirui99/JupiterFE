@@ -3,11 +3,199 @@
 .site-layout-background {
   background: #fff;
 }
- 
+
+/* 热门游戏列表：视口相关高度，避免在矮屏上比屏幕还高 */
 .site-top-game-list ul {
-  max-height: 700px;
+  max-height: min(700px, 45vh);
   overflow-y: auto;
   overflow-x: hidden;
 }
 
+.site-content-layout {
+  padding: 24px;
+}
 
+/* ---------- YouTube 风格的视频网格 ---------- */
+
+/* auto-fill + minmax 让列数随宽度自适应，且每列等宽，
+   不会像 flex 那样被超长标题撑开。
+   最小列宽定得大一些，缩略图才够看，宽屏上大约 3-5 列 */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  column-gap: 20px;
+  row-gap: 40px;
+}
+
+.video-card {
+  min-width: 0;
+}
+
+.video-thumb {
+  display: block;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e9e9e9;
+}
+
+.video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .25s ease;
+}
+
+.video-card:hover .video-thumb img {
+  transform: scale(1.04);
+}
+
+.video-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* min-width: 0 是关键：让弹性子项可以收缩到内容宽度以下，省略号才生效 */
+.video-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.video-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(0, 0, 0, .88);
+}
+
+.video-title:hover {
+  color: rgba(0, 0, 0, .88);
+}
+
+.video-channel {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, .45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 收藏按钮平时淡出，悬停卡片时显现，避免抢视觉 */
+.video-fav {
+  flex: none;
+  opacity: .35;
+  transition: opacity .2s ease;
+}
+
+.video-card:hover .video-fav,
+.video-fav:focus {
+  opacity: 1;
+}
+
+.video-tabs .ant-tabs-content-holder {
+  padding-top: 4px;
+}
+
+/* 无限滚动的底部哨兵与状态提示 */
+.video-sentinel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 16px 0;
+}
+
+.video-end {
+  font-size: 12px;
+  color: rgba(0, 0, 0, .35);
+}
+
+/* 顶栏左侧：汉堡按钮 + 站点名 */
+.site-menu-trigger {
+  color: #fff;
+  margin-right: 4px;
+}
+
+.site-brand {
+  margin-right: 16px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  vertical-align: middle;
+}
+
+.site-menu-trigger:hover,
+.site-menu-trigger:focus {
+  color: #fff;
+  background: rgba(255, 255, 255, .12);
+}
+
+/* 抽屉里的菜单铺满，去掉多余留白 */
+.site-menu-drawer .ant-menu {
+  border-right: 0;
+}
+
+/* ---- 平板及以下 ---- */
+@media (max-width: 992px) {
+  .site-content-layout {
+    padding: 12px;
+  }
+
+  /* 360px 的最小列宽在平板上只排得下一列，收一档换两列 */
+  .video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    row-gap: 28px;
+  }
+
+  .video-title {
+    font-size: 15px;
+  }
+}
+
+/* ---- 手机 ---- */
+@media (max-width: 576px) {
+  .site-content-layout {
+    padding: 8px;
+  }
+
+  /* antd Header 默认左右各 50px，窄屏会把按钮挤出可视区 */
+  .ant-layout-header {
+    padding: 0 12px;
+  }
+
+  .ant-layout-content {
+    padding: 12px !important;
+  }
+
+  /* 单列时缩小间距，并让收藏按钮常驻（触屏没有 hover） */
+  .video-grid {
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+  }
+
+  .video-fav {
+    opacity: 1;
+  }
+
+  /* 收藏抽屉固定 720px，比手机屏还宽一倍 */
+  .site-favorites-drawer .ant-drawer-content-wrapper {
+    width: 100% !important;
+  }
+}
+
+/* 横屏手机等矮屏：交给整页滚动，不再套内层滚动区 */
+@media (max-height: 500px) {
+  .ant-layout-content {
+    min-height: 0 !important;
+  }
+}
