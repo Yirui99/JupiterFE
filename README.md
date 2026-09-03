@@ -1,3 +1,9 @@
+> **Moved.** The frontend now lives in
+> [Yirui99/Jupiter](https://github.com/Yirui99/Jupiter) under `frontend/`, alongside
+> the backend it is built against. Its history came along, so the commits below are
+> reachable from there too. This repository is kept only so existing links resolve;
+> new work happens in Jupiter.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
